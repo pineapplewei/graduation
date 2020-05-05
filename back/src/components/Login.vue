@@ -1,65 +1,87 @@
 <template>
-  <div class="login">
-    <div class="contain">
-      <h1>专业培养计划管理系统</h1>
-      <form>
-        <div class="form-group">
-          <label for="exampleInputEmail1">账号：</label>
-          <input type="text" class="form-control" id="exampleInputEmail1" placeholder="请输入账号" />
-        </div>
-        <div class="form-group">
-          <label for="exampleInputPassword1">密码：</label>
-          <input
-            type="password"
-            class="form-control"
-            id="exampleInputPassword1"
-            placeholder="请输入密码"
-          />
-        </div>
-        <div align="center" class="btn-con">
-          <a class="btn btn-danger changecolor">登陆</a>
-        </div>
-        <p style="text-align: right;color: gray; ">魏攀</p>
-      </form>
+  <div class="Login">
+    <h1>专业培养计划管理系统</h1>
+    <div class="formcontain">
+      <el-form
+        :model="ruleForm"
+        ref="ruleForm"
+        label-width="100px"
+        class="formcontain1"
+      >
+        <el-form-item label="账号" prop="number">
+          <el-input type="text" v-model="ruleForm.number" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="pass">
+          <el-input type="password" v-model="ruleForm.pass" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="submitForm(ruleForm)">登陆</el-button>
+          <el-button @click="resetForm(ruleForm)">重置</el-button>
+        </el-form-item>
+      </el-form>
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "Login",
   data() {
-    return {};
+    return {
+      ruleForm: {
+        pass: "",
+        number: ""
+      }
+    };
+  },
+  methods: {
+    submitForm(ruleForm) {
+      this.$axios.post('http://localhost:3000/login',{
+        params: {
+          count: ruleForm.number,
+          password: ruleForm.pass
+        }
+      })
+        .then(res => {
+          if(res.data.list.length==0){
+            this.$message.error('太天真了，查无此人');
+            this.$refs[ruleForm].resetFields();
+          }else{
+            console.log("您可以登陆您的信息是:", res.data);
+            this.$router.push({path:'/home',query:{ obj:res.data}})
+            this.$store.state.admin.push(res.data)
+          }
+        })
+        .catch(res=> {
+          console.log('登陆失败了555')
+        });
+    },
+
+    resetForm(ruleForm) {
+      this.$refs[ruleForm].resetFields();
+    }
   }
 };
+
 </script>
 <style scoped>
-.login {
+.Login {
   width: 100%;
   height: 100vh;
   background-color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 h1 {
+  margin-top: 100px;
   color: #dc3545;
   text-align: center;
 }
-.form-group {
-  color: #dc3545;
+.formcontain1 {
+  width: 35%;
+  margin: 30px;
+  text-align: center;
 }
-.contain {
-  width: 600px;
-  height: 600px;
-}
-.btn-con {
-  margin-top: 60px;
-}
-.form-group {
+.formcontain {
+  display: flex;
+  justify-content: center;
   margin: 50px;
-}
-.changecolor{
-  width: 400px;
 }
 </style>

@@ -1,83 +1,88 @@
 <template>
-    <div class="Managemajor">
-        <h1>专业管理页面</h1>
-        <div class="majoroperate">
-            <div class="fontsize">专业名称</div>
-            <input type="text" size="35">
-            <button>提交</button>
-        </div>
-        <div class="majorlist">
-            <ul>
-                    <li v-for="item in majorlist" :key="item.index">
-                        <a href="#">{{item}}</a>
-                        <span>/</span>
-                        <a href="#">删除</a>
-                    </li>
-                </ul>
-        </div>
-        
+  <div class="Managemajor">
+    <h1>专业管理页面</h1>
+    <div class="majoroperate">
+      <div class="fontsize">专业名称</div>
+      <input type="text" size="35" v-model="name"/>
+      <el-button type="primary" @click.native.prevent="find(majorlist)">查询</el-button>
+      <el-button type="primary" @click.native.prevent="add(majorname,majorlist)">添加</el-button>
     </div>
+    <div class="majorlist">
+      <el-table :data="majorlist[0].list" style="width: 40%">
+        <el-table-column type="index" :index="indexMethod" width="100"></el-table-column>
+        <el-table-column prop="majorname" label="名称" width="300"></el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button
+              @click.native.prevent="deleteRow(scope.$index, majorlist)"
+              type="text"
+              size="small"
+            >移除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+  </div>
 </template>
 
 <script>
-    export default {
-        name:"",
-        data(){
-            return{
-                majorlist:[
-                    "1.数学与应用数学",
-                    "2.计算机科学与技术",
-                    "3.信息管理",
-                    "4.金融学",
-                    "5.网络工程",
-                    "6.市场营销",
-                    "1.数学与应用数学",
-                    "2.计算机科学与技术",
-                    "3.信息管理",
-                    "4.金融学",
-                    "5.网络工程",
-                    "6.市场营销",
-                ]
-            }
-        }
+export default {
+  data() {
+    return {
+      name: "",
+      majorlist: []
+    };
+  },
+    methods: {
+    indexMethod(index) {
+      return index + 1;
+    },
+    deleteRow(index, rows) {
+      rows.splice(index, 1);
+    },
+    add(majorname,majorlist){
+      var majorname={}
+      majorname.name=this.name
+      majorlist.push(majorname)
+    },
+    },
+    created(){
+      this.$axios.get('http://localhost:3000/')
+    .then((res)=>{
+      this.majorlist.push(res.data)
+      console.log(this.majorlist)
+    })
+    .catch(function(res){
+      console.log('非常抱歉调用接口失败')
+    })
     }
+};
 </script>
 
 <style scoped>
-
-.Managemajor{
-    margin: 0px;
-    padding: 0px;
-    height: 100vh;
+.Managemajor {
+  width: 80%;
   background-color: white;
+  height: 100vh;
+  float: right;
 }
-.majoroperate{
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    text-align: center;
+.majoroperate {
+  width: 100%;
+  display: flex;
+  justify-content: left;
+  text-align: center;
 }
-.majorlist{
-    margin-top: 40px;
+.majorlist {
+  margin-top: 40px;
 }
-.fontsize{
-    text-align: center;
-    font-size: 1.5rem;
-    line-height: 1.5rem;
+.fontsize {
+  text-align: left;
+  font-size: 1.5rem;
+  line-height: 2.5rem;
 }
-ul{
-    list-style: none;
-    padding: 0px;
-    font-size: 1.7rem;
-    overflow-y:scroll;
-    height: 500px;
-}
-ul>li{
-    text-align: center;
-    margin: 20px;
-}
-h1{
-    text-align: center;
-    line-height: 200px;
+
+h1 {
+  text-align: left;
+  line-height: 200px;
 }
 </style>
