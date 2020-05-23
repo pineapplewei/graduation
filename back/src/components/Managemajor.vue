@@ -3,25 +3,22 @@
     <h1>专业管理页面</h1>
     <div class="majoroperate">
       <div class="fontsize">专业名称</div>
-      <input type="text" size="35" v-model="name"/>
+      <input type="text" size="35" v-model="name" />
       <el-button type="primary" @click.native.prevent="find(majorlist)">查询</el-button>
-      <el-button type="primary" @click.native.prevent="add(majorname,majorlist)">添加</el-button>
+      <el-button type="primary" @click.native.prevent="add()">添加</el-button>
     </div>
     <div class="majorlist">
-      <el-table :data="majorlist[0].list" style="width: 40%">
+      <el-table :data="majorlist[0]" style="width: 40%">
         <el-table-column type="index" :index="indexMethod" width="100"></el-table-column>
         <el-table-column prop="majorname" label="名称" width="300"></el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button
-              @click.native.prevent="deleteRow(scope.$index, majorlist)"
-              type="text"
-              size="small"
-            >移除</el-button>
+        <el-table-column label="操作" width="150">
+          <template>
+            <el-button type="text" @click="del(delnumber)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
     </div>
+
   </div>
 </template>
 
@@ -30,32 +27,67 @@ export default {
   data() {
     return {
       name: "",
-      majorlist: []
+      majorlist: [],
+      delnumber:''
     };
   },
-    methods: {
+  methods: {
     indexMethod(index) {
       return index + 1;
     },
-    deleteRow(index, rows) {
-      rows.splice(index, 1);
+    find(majorlist) {
+      this.$axios
+        .post("http://localhost:3000/getmajor", {
+          params: {
+            name: this.name
+          }
+        })
+        .then(res => {
+          this.majorlist.push(res.data.list);
+          this.delnumber = res.data.list[0].id
+          this.name = "";
+        })
+        .catch(function(res) {
+          console.log("非常抱歉调用接口失败");
+        });
     },
-    add(majorname,majorlist){
-      var majorname={}
-      majorname.name=this.name
-      majorlist.push(majorname)
+    add(){
+      this.$axios
+        .post("http://localhost:3000/addmajor", {
+          params: {
+            name: this.name
+          }
+        })
+        .then(res => {
+          this.$message({
+              showClose: true,
+              message: '恭喜你，添加成功',
+              type: 'success'
+          });
+        })
+        .catch(function(res) {
+          console.log("非常抱歉调用接口失败");
+        });      
     },
-    },
-    created(){
-      this.$axios.get('http://localhost:3000/')
-    .then((res)=>{
-      this.majorlist.push(res.data)
-      console.log(this.majorlist)
-    })
-    .catch(function(res){
-      console.log('非常抱歉调用接口失败')
-    })
+    del(delnumber){
+      this.$axios
+        .post("http://localhost:3000/delmajor", {
+          params: {
+            delnumber: this.delnumber
+          }
+        })
+        .then(res => {
+          this.$message({
+              showClose: true,
+              message: '恭喜你，删除成功',
+              type: 'success'
+          });
+        })
+        .catch(function(res) {
+          console.log("非常抱歉调用接口失败");
+        });      
     }
+  }
 };
 </script>
 

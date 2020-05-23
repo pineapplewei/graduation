@@ -57,8 +57,8 @@ export default {
           path:"Plandesign"
         },
         {
-          title:"教学大纲",
-          path:"Teachingprogram"
+          title:"大纲列表",
+          path:"Outlinelist"
         }
       ],
       student:[
@@ -69,10 +69,6 @@ export default {
         {
           title:"培养方案",
           path:"Plandesign"
-        },
-        {
-          title:"教学大纲",
-          path:"Teachingprogram"
         }
       ]
     }

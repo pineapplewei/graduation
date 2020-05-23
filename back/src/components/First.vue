@@ -3,7 +3,6 @@
         <div class="name">Hello!</div>
         <div class="info">追求源于热爱</div>
         <div class="foot"><p>Maybe I fall or maybe I drown again and pain again</p></div> 
-        
     </div>
 </template>
 
@@ -11,12 +10,11 @@
     export default {
         data(){
             return{
-
+                fileList:[]
             }
         },
         
         methods:{
-            
         }
     }
 </script>

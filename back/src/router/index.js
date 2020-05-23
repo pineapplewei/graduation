@@ -6,7 +6,7 @@ import Managemajor from '@/components/Managemajor'
 import First from '@/components/First'
 import People from '@/components/People'
 import Plan from '@/components/Plan'
-import Teaching from '@/components/Teaching'
+import Outlinelist from '@/components/Outlinelist'
 Vue.use(Router)
 
 export default new Router({
@@ -16,6 +16,14 @@ export default new Router({
       path: '/',
       name: 'Login',
       component:Login
+    },
+    {
+      path: '/Outlinelist',
+      name: 'Outlinelist',
+      components:{
+        left:Sidebar,
+        right:Outlinelist
+      }
     },
     {
       path: '/Managemajor',
@@ -47,14 +55,6 @@ export default new Router({
       components:{
         left:Sidebar,
         right:Plan
-      }
-    },
-    {
-      path: '/Teachingprogram',
-      name: 'Teachingprogram',
-      components:{
-        left:Sidebar,
-        right:Teaching
       }
     }
   ]

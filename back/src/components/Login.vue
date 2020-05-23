@@ -36,17 +36,17 @@ export default {
   methods: {
     submitForm(ruleForm) {
       this.$axios.post('http://localhost:3000/login',{
-        params: {
+        params:{
           count: ruleForm.number,
           password: ruleForm.pass
-        }
-      })
+          }
+        })
         .then(res => {
           if(res.data.list.length==0){
             this.$message.error('太天真了，查无此人');
             this.$refs[ruleForm].resetFields();
           }else{
-            console.log("您可以登陆您的信息是:", res.data);
+            // console.log("您可以登陆您的信息是:", res.data);
             this.$router.push({path:'/home',query:{ obj:res.data}})
             this.$store.state.admin.push(res.data)
           }

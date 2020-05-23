@@ -1,18 +1,20 @@
 var dbConfig = require('../util/dbconfig')
+
 let fs = require('fs')
 //OK---登陆账号
 login = (req, res) => {
-  console.log('请求到达后端')
-  let Personcount = req.query.count;
-  let Personpassword = req.query.password;
-  var sql = "select * from person where personcount=? and personpassword=?";
-  var sqlArr = [Personcount, Personpassword];
-  var callBack = (err, people) => {
-    if (err) {
-      res.send('查询失败')
+  let  personcount= req.body.params.count
+  let  personpassword= req.body.params.password
+  var sql = `select * from person where personcount=? and personpassword=?`
+  var sqlArr = [personcount,personpassword]
+  var callBack = (err, data) => {
+    if (err){
+      console.log('登陆失败')
     } else {
+      // console.log(res.data)
       res.send({
-        'list1': people
+        'msg':"登陆成功",
+        'list': data
       })
     }
   }
@@ -21,28 +23,13 @@ login = (req, res) => {
 
 //OK---通过学号查看用户
 getPerson = (req, res) => {
-  let { personcount } = req.query
+  console.log(req.body.params)
+  let  personcount= req.body.params.count
   var sql = `select * from person where personcount=?`
   var sqlArr = [personcount]
   var callBack = (err, data) => {
     if (err) {
       console.log('查找人员失败')
-    } else {
-      res.send({
-        'list1': data
-      })
-    }
-  }
-  dbConfig.sqlConnect(sql, sqlArr, callBack)
-}
-//OK---添加用户
-addPerson = (req, res) => {
-  let { personname, personcount, personpassword, role, pmjn_id, pdtm_id } = req.query
-  var sql = "insert into person(personname,personcount,personpassword,role,pmjn_id,pdtm_id) value(?,?,?,?,?,?)"
-  var sqlArr = [personname, personcount, personpassword, role, pmjn_id, pdtm_id]
-  var callBack = (err, data) => {
-    if (err) {
-      console.log('添加用户失败')
     } else {
       res.send({
         'list': data
@@ -51,10 +38,32 @@ addPerson = (req, res) => {
   }
   dbConfig.sqlConnect(sql, sqlArr, callBack)
 }
+//OK---添加用户
+addPerson = (req, res) => {
+  let  personname= req.body.params.personname
+  let  personcount= req.body.params.personcount
+  let  personpassword= req.body.params.personpassword
+  let  role= req.body.params.role
+  let  pmjn_id= req.body.params.pmjn_id
+  let  pdtm_id= req.body.params.pdtm_id            
+  var sql = "insert into person(personname,personcount,personpassword,role,pmjn_id) value(?,?,?,?,?)"
+  var sqlArr = [personname, personcount, personpassword, role, pmjn_id]
+  var callBack = (err, data) => {
+    if (err) {
+      console.log(err)
+    } else {
+      res.send({
+        'list': data
+      })
+    }
+  }
+  dbConfig.sqlConnect(sql, sqlArr, callBack)
+}
+//OK---删除用户
 delPerson = (req, res) => {
-  let {id} = req.query
+  let delnumber= req.body.params.delnumber
   var sql = `delete from person where id=?`
-  var sqlArr = [id]
+  var sqlArr = [delnumber]
   var callBack = (err, data) => {
     if (err) {
       console.log('删除用户失败')
@@ -69,7 +78,7 @@ delPerson = (req, res) => {
 
 //OK---通过专业名称查看专业信息
 getmajor = (req, res) => {
-  let { majorname } = req.query
+  let majorname  = req.body.params.name
   var sql = `select * from major where majorname=?`
   var sqlArr = [majorname]
   var callBack = (err, data) => {
@@ -84,9 +93,9 @@ getmajor = (req, res) => {
   dbConfig.sqlConnect(sql, sqlArr, callBack)
 }
 addmajor = (req, res) => {
-  let { majorname } = req.query
+  let name = req.body.params.name
   var sql = `insert into major(majorname) value(?)`
-  var sqlArr = [majorname]
+  var sqlArr = [name]
   var callBack = (err, data) => {
     if (err) {
       console.log('添加专业失败')
@@ -99,15 +108,15 @@ addmajor = (req, res) => {
   dbConfig.sqlConnect(sql, sqlArr, callBack)
 }
 delmajor = (req, res) => {
-  let {id} = req.query
+  let delnumber = req.body.params.delnumber
   var sql = `delete from major where id=?`
-  var sqlArr = [id]
+  var sqlArr = [delnumber]
   var callBack = (err, data) => {
     if (err) {
       console.log('删除专业失败')
     } else {
       res.send({
-        'list1': data
+        'list': data
       })
     }
   }
@@ -116,7 +125,8 @@ delmajor = (req, res) => {
 
 //OK---查询培养计划课程表
 getplan = (req, res) => {
-  let { yeartime, majorname } = req.query
+  let  yeartime= req.body.params.time
+  let  majorname= req.body.params.name
   var sql = `
   select
   yeartime,
@@ -125,6 +135,7 @@ getplan = (req, res) => {
   classname,
   classcategory.classcategory,
   semeser.semesernumber,
+  credit,
   totalhours,
   teaching,
   experiment,
@@ -132,8 +143,8 @@ getplan = (req, res) => {
   examination,
   Investigate,
   outline
-  from teachingplan,major,semeser,classcategory
-  where yeartime=? and major.majorname=?`
+  from teachingplan,major,semeser,classcategory 
+  where pmjn_id=major.id and psn_id=semeser.id and pccn_id=classcategory.id and yeartime=? and major.majorname=?`
   var sqlArr = [yeartime, majorname];
   var callBack = (err, data) => {
     if (err) {
@@ -148,33 +159,21 @@ getplan = (req, res) => {
 }
 //添加培养计划课程表
 addplan = (req,res) => {
+  let yeartime  = req.body.params.yeartime
+  let sourse_encouding  = req.body.params.sourse_encouding
+  let classname  = req.body.params.classname
+  let credit  = req.body.params.credit
+  let totalhours  = req.body.params.totalhours
+  let teaching  = req.body.params.teaching
+  let experiment  = req.body.params.experiment
+  let practice  = req.body.params.practice
+  let examination  = req.body.params.examination
+  let Investigate  = req.body.params.investigate
+  let outline  = req.body.params.outline
+  let pmjn_id  = req.body.params.pmjn_id
+  let psn_id  = req.body.params.psn_id
+  let pccn_id  = req.body.params.pccn_id
 
-  if (req.file.length === 0) {
-    res.render("error", {message: "上传文件不能为空！"});
-    return
-}else{
-    let file = req.file
-    fs.renameSync('./public/uploads/' + file.filename, './public/uploads/' + file.originalname)
-    
-    res.set({
-        'content-type': 'application/json; charset=utf-8'
-    });
-
-    var imgurl = 'http://localhost:3000/uploads'+file.originalname}
-
-  let { yeartime,
-    sourse_encouding,
-    classname,
-    credit,
-    totalhours,
-    teaching,
-    experiment,
-    practice,
-    examination,
-    Investigate,
-    pmjn_id,
-    psn_id,
-    pccn_id } = req.query
   var sql = `insert into teachingplan(
       yeartime,
       sourse_encouding,
@@ -200,7 +199,7 @@ addplan = (req,res) => {
     practice,
     examination,
     Investigate,
-    imgurl,
+    outline,
     pmjn_id,
     psn_id,
     pccn_id]
@@ -210,16 +209,61 @@ addplan = (req,res) => {
     } else {
       res.send({
         'code':200,
-        'msg':'插入成功',
+        'msg':"插入成功"
       })
     }
   }
   dbConfig.sqlConnect(sql, sqlArr, callBack)
 }
 delplan = (req, res) => {
-  let {id} = req.query
-  var sql = `delete from teachingplan where id=?`
-  var sqlArr = [id]
+  let delnumber = req.body.params.delnumber
+  var sql = `delete from teachingplan where sourse_encouding=?`
+  var sqlArr = [delnumber]
+  var callBack = (err, data) => {
+    if (err) {
+      console.log('删除课程失败')
+    } else {
+      res.send({
+        'list1': data
+      })
+    }
+  }
+  dbConfig.sqlConnect(sql, sqlArr, callBack)
+}
+
+//上传教学大纲接口
+upoutline = (req, res) => {
+  let file = req.file
+  fs.renameSync('./public/uploads/' + file.filename, './public/uploads/' + file.originalname)
+  res.set({
+      'content-type': 'application/json; charset=utf-8'
+  });
+  var imgurl = 'http://localhost:3000/uploads'+'/'+file.originalname
+  res.send({
+    'list':imgurl,
+    'code':'200'
+  })
+}
+//初始化下载教学大纲列表
+outlinelist = (req, res) => {
+  var sql = `select sourse_encouding,classname,outline from teachingplan`
+  var sqlArr = []
+  var callBack = (err, data) => {
+    if (err) {
+      console.log('初始化教学大纲列表失败')
+    } else {
+      res.send({
+        'list': data
+      })
+    }
+  }
+  dbConfig.sqlConnect(sql, sqlArr, callBack)
+}
+//删除教学大纲
+deloutline = (req, res) => {
+  let delnumber = req.body.params.delnumber
+  var sql = `update teachingplan SET outline ='' where sourse_encouding=?`
+  var sqlArr = [delnumber]
   var callBack = (err, data) => {
     if (err) {
       console.log('删除课程失败')
@@ -241,5 +285,8 @@ module.exports = {
   delmajor,
   getplan,
   addplan,
-  delplan
+  delplan,
+  upoutline,
+  outlinelist,
+  deloutline
 }

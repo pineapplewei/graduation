@@ -1,6 +1,6 @@
 const mysql = require('mysql')
 module.exports = {
-    //数据库配置
+    // 数据库配置
     config:{
         host:'localhost',
         port:'3306',
@@ -8,7 +8,7 @@ module.exports = {
         password:'root',
         database:'plan',
     },
-    //连接数据库
+    // 连接数据库
     sqlConnect:function(sql,sqlArr,callBack){
         var pool  = mysql.createPool(this.config)
         pool.getConnection((err,conn)=>{
@@ -20,8 +20,9 @@ module.exports = {
             //释放连接
             conn.release()
         })
+
     },
-    //promise回调
+    // promise回调
     SySqlconnect:function(sySql,sqlArr){
         return new Promise((resolve,reject)=>{
             var pool  = mysql.createPool(this.config)
